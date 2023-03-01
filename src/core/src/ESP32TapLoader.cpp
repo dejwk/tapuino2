@@ -11,7 +11,7 @@ ESP32TapLoader::ESP32TapLoader(
 #ifdef ROO_TESTING
     : TapLoader(utilityCollection, scheduler),
       scheduler_(scheduler),
-      task_(&scheduler, [this]() { ESP32TapLoader::TapSignalTimerStatic(); })
+      task_(scheduler, [this]() { ESP32TapLoader::TapSignalTimerStatic(); })
 #else
     : TapLoader(utilityCollection, scheduler)
 #endif
