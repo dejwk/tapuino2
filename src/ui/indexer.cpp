@@ -8,7 +8,7 @@
 #include "roo_smooth_fonts/NotoSans_Condensed/12.h"
 #include "roo_smooth_fonts/NotoSans_Condensed/15.h"
 #include "roo_smooth_fonts/NotoSans_Condensed/18.h"
-#include "roo_toolkit/log/log.h"
+// #include "roo_toolkit/log/log.h"
 #include "roo_windows/containers/scrollable_panel.h"
 #include "roo_windows/containers/vertical_layout.h"
 #include "roo_windows/core/application.h"

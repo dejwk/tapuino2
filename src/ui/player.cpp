@@ -20,7 +20,7 @@
 #include "resources/gear_24_20.h"
 #include "resources/gear_24_40.h"
 #include "roo_dashboard/meters/percent_progress_bar.h"
-#include "roo_toolkit/log/log.h"
+// #include "roo_toolkit/log/log.h"
 #include "roo_windows/containers/aligned_layout.h"
 #include "roo_windows/containers/horizontal_layout.h"
 #include "roo_windows/containers/list_layout.h"
@@ -41,10 +41,9 @@ namespace {
 
 class BasePressableButton : public Button {
  protected:
-  BasePressableButton(const Environment& env)
-      : Button(env, Button::CONTAINED) {
-        setElevation(9, 0);
-      }
+  BasePressableButton(const Environment& env) : Button(env, Button::CONTAINED) {
+    setElevation(9, 0);
+  }
 
  public:
   void setPushedDown(bool pushed_down) {

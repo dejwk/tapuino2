@@ -13,7 +13,7 @@
 #include "roo_smooth_fonts/NotoSans_Condensed/15.h"
 #include "roo_smooth_fonts/NotoSans_Condensed/18.h"
 // #include "roo_smooth_fonts/NotoSans_CondensedBold/15.h"
-#include "roo_toolkit/log/log.h"
+// #include "roo_toolkit/log/log.h"
 #include "roo_windows/containers/aligned_layout.h"
 #include "roo_windows/containers/horizontal_layout.h"
 #include "roo_windows/containers/list_layout.h"
