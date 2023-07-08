@@ -18,7 +18,7 @@ namespace {
 class Contents : public AlignedLayout {
  public:
   Contents(const Environment &env)
-      : AlignedLayout(env), label_(env, "", *env.theme().font.h6) {
+      : AlignedLayout(env), label_(env, "", font_h6()) {
     add(label_, roo_display::kCenter | roo_display::kMiddle);
   }
 

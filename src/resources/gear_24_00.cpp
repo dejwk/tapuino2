@@ -18,8 +18,8 @@ static const uint8_t gear_24_00_data[] PROGMEM = {
   0x0B, 0x80, 0x96, 0x18, 0x43, 0x66, 0x66, 0x38, 0x0B, 0x51,
 };
 
-const RleImage4bppxBiased<Alpha4, PrgMemResource>& gear_24_00() {
-  static RleImage4bppxBiased<Alpha4, PrgMemResource> value(
+const RleImage4bppxBiased<Alpha4, ProgMemPtr>& gear_24_00() {
+  static RleImage4bppxBiased<Alpha4, ProgMemPtr> value(
       24, 24, gear_24_00_data, Alpha4(color::Black));
   return value;
 }

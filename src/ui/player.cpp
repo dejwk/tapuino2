@@ -4,22 +4,26 @@
 #include "memory/mem_buffer.h"
 #include "roo_display/core/utf8.h"
 #include "roo_display/ui/string_printer.h"
-#include "roo_material_icons/outlined/18/av.h"
-#include "roo_material_icons/outlined/24/action.h"
-#include "roo_material_icons/outlined/24/content.h"
-#include "roo_material_icons/outlined/24/file.h"
-#include "roo_material_icons/outlined/24/navigation.h"
-#include "roo_material_icons/outlined/48/av.h"
-#include "roo_smooth_fonts/NotoSans_Condensed/12.h"
-#include "roo_smooth_fonts/NotoSans_Condensed/15.h"
-#include "roo_smooth_fonts/NotoSans_Condensed/18.h"
-// #include "roo_smooth_fonts/NotoSans_CondensedBold/15.h"
+// #include "roo_material_icons/outlined/18/av.h"
+// #include "roo_material_icons/outlined/24/action.h"
+// #include "roo_material_icons/outlined/24/content.h"
+// #include "roo_material_icons/outlined/24/file.h"
+
 #include "core/include/Lang.h"
 #include "core/include/TapLoader.h"
 #include "resources/gear_24_00.h"
 #include "resources/gear_24_20.h"
 #include "resources/gear_24_40.h"
 #include "roo_dashboard/meters/percent_progress_bar.h"
+#include "roo_material_icons/outlined/18/navigation.h"
+#include "roo_material_icons/outlined/24/navigation.h"
+#include "roo_material_icons/outlined/36/navigation.h"
+#include "roo_material_icons/outlined/48/av.h"
+#include "roo_material_icons/outlined/48/navigation.h"
+#include "roo_windows/fonts/NotoSans_Condensed/11.h"
+#include "roo_windows/fonts/NotoSans_Condensed/14.h"
+#include "roo_windows/fonts/NotoSans_Condensed/21.h"
+#include "roo_windows/fonts/NotoSans_Condensed/28.h"
 // #include "roo_toolkit/log/log.h"
 #include "roo_windows/containers/aligned_layout.h"
 #include "roo_windows/containers/horizontal_layout.h"
@@ -77,7 +81,7 @@ class PlayButton : public BasePressableButton {
       Alignment pause_alignment = (kRight.shiftBy(-5) | kBottom.shiftBy(-5));
       // Find out where the pause icon starts in terms of the X coordinate.
       XDim cutoff =
-          pause_alignment.resolveOffset(bounds.asBox(), motor.extents()).first;
+          pause_alignment.resolveOffset(bounds.asBox(), motor.extents()).dx;
       Canvas play_canvas = canvas;
       play_canvas.clipToExtents(Rect(bounds.xMin(), bounds.yMin(),
                                      bounds.xMin() + cutoff - 1,
@@ -160,14 +164,27 @@ class StopButton : public BasePressableButton {
   Mode mode_;
 };
 
+constexpr roo_windows::YDim RowHeight() {
+  return ROO_WINDOWS_ZOOM >= 200   ? 80
+         : ROO_WINDOWS_ZOOM >= 150 ? 53
+                                   : Scaled(40);
+}
+
+inline const roo_display::Font& base_font() {
+  return ROO_WINDOWS_ZOOM >= 200   ? roo_display::font_NotoSans_Condensed_28()
+         : ROO_WINDOWS_ZOOM >= 150 ? roo_display::font_NotoSans_Condensed_21()
+         : ROO_WINDOWS_ZOOM >= 100 ? roo_display::font_NotoSans_Condensed_14()
+                                   : roo_display::font_NotoSans_Condensed_11();
+}
+
 }  // namespace
 
 class PlayerHeader : public HorizontalLayout {
  public:
   PlayerHeader(const Environment& env, std::function<void()> back_fn)
       : HorizontalLayout(env),
-        back_(env, ic_outlined_24_navigation_arrow_back()),
-        path_(env, "/", roo_display::font_NotoSans_Condensed_15(),
+        back_(env, SCALED_ROO_ICON(outlined, navigation_arrow_back)),
+        path_(env, "/", base_font(),
               roo_display::kLeft | roo_display::kMiddle) {
     back_.setMargins(MARGIN_NONE);
     path_.setMargins(MARGIN_NONE);
@@ -176,12 +193,12 @@ class PlayerHeader : public HorizontalLayout {
     add(back_, HorizontalLayout::Params().setGravity(kVerticalGravityMiddle));
     add(path_, HorizontalLayout::Params().setGravity(kVerticalGravityMiddle));
     setBackground(env.theme().color.secondary);
-    back_.setOnClicked(back_fn);
+    back_.setOnInteractiveChange(back_fn);
   }
 
   PreferredSize getPreferredSize() const override {
     return PreferredSize(PreferredSize::MatchParentWidth(),
-                         PreferredSize::ExactHeight(40));
+                         PreferredSize::ExactHeight(RowHeight()));
   }
 
   void setPath(std::string path) { path_.setText(std::move(path)); }
@@ -197,8 +214,8 @@ class PlayerProgress : public VerticalLayout {
       : VerticalLayout(env),
         progress_bar_(env),
         footer_(env),
-        read_bytes_(env, "0", *env.theme().font.body2),
-        all_bytes_(env, "", *env.theme().font.body2,
+        read_bytes_(env, "0", font_body2()),
+        all_bytes_(env, "", font_body2(),
                    roo_display::kRight | roo_display::kMiddle) {
     footer_.add(read_bytes_, roo_display::kLeft | roo_display::kTop);
     footer_.add(all_bytes_, roo_display::kRight | roo_display::kTop);
@@ -261,7 +278,7 @@ class PlayerContentPanel : public VerticalLayout {
                      std::function<void()> rewind_fn)
       : VerticalLayout(env),
         header_(env, back_fn),
-        filename_(env, "", roo_display::font_NotoSans_Condensed_15(),
+        filename_(env, "", base_font(),
                   roo_display::kCenter | roo_display::kMiddle),
         progress_(env),
         buttons_(env),
@@ -280,13 +297,13 @@ class PlayerContentPanel : public VerticalLayout {
     add(buttons_,
         VerticalLayout::Params().setGravity(kHorizontalGravityCenter));
     stop_.setInteriorColor(roo_display::color::DarkRed);
-    play_.setOnClicked(play_fn);
+    play_.setOnInteractiveChange(play_fn);
     // stop_.setEnabled(false);
     play_.setPushedDown(false);
     // stop_.setPushedDown(true);
     stop_.setPushedDown(false);
 
-    stop_.setOnClicked([stop_fn, rewind_fn, this]() {
+    stop_.setOnInteractiveChange([stop_fn, rewind_fn, this]() {
       if (stop_.mode() == StopButton::STOP)
         stop_fn();
       else

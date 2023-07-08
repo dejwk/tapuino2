@@ -71,7 +71,7 @@ class IndexerPanel : public VerticalLayout {
     abort_.setPadding(PADDING_HUGE, PADDING_REGULAR);
     abort_.setMargins(MARGIN_HUGE);
     add(abort_, VerticalLayout::Params().setGravity(kHorizontalGravityCenter));
-    abort_.addOnClicked([this]() {
+    abort_.setOnInteractiveChange([this]() {
       getTask()->showAlertDialog("Abort scan?", "", {"CANCEL", "ABORT"},
                                  [this](int id) {
                                    if (id == 1) abort_fn_();
@@ -265,7 +265,8 @@ void IndexBuilder::stageInitMasterIndexBuild() {
     error_details_ = strerror(errno);
     return;
   }
-  // Make sure that the root dir is written even if there are no TAP files in it.
+  // Make sure that the root dir is written even if there are no TAP files in
+  // it.
   commitPath();
   stage_ = &IndexBuilder::stageContinueMasterIndexBuild;
   activity_.setStage("Scanning directory tree...");

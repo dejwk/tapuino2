@@ -9,11 +9,29 @@
 #include "roo_material_icons/outlined/24/content.h"
 #include "roo_material_icons/outlined/24/file.h"
 #include "roo_material_icons/outlined/24/navigation.h"
-#include "roo_smooth_fonts/NotoSans_Condensed/12.h"
+#include "roo_material_icons/outlined/36/action.h"
+#include "roo_material_icons/outlined/36/content.h"
+#include "roo_material_icons/outlined/36/file.h"
+#include "roo_material_icons/outlined/36/navigation.h"
+// #include "roo_windows/fonts/RobotoCondensed_Regular/12.h"
+// #include "roo_windows/fonts/RobotoCondensed_Regular/16.h"
+// #include "roo_windows/fonts/RobotoCondensed_Regular/24.h"
+// #include "roo_windows/fonts/RobotoCondensed_Regular/32.h"
+
+#include "roo_smooth_fonts/NotoSans_Bold/15.h"
 #include "roo_smooth_fonts/NotoSans_Condensed/15.h"
-#include "roo_smooth_fonts/NotoSans_Condensed/18.h"
+#include "roo_smooth_fonts/NotoSans_Regular/15.h"
+#include "roo_windows/fonts/NotoSans_Condensed/11.h"
+#include "roo_windows/fonts/NotoSans_Condensed/14.h"
+#include "roo_windows/fonts/NotoSans_Condensed/21.h"
+#include "roo_windows/fonts/NotoSans_Condensed/28.h"
+
+// #include "roo_windows/fonts/RobotoCondensed_Regular/15.h"
+// #include "roo_windows/fonts/RobotoCondensed_Regular/15.h"
+// #include "roo_windows/fonts/RobotoCondensed_Regular/15.h"
 // #include "roo_smooth_fonts/NotoSans_CondensedBold/15.h"
 // #include "roo_toolkit/log/log.h"
+#include "roo_windows/config.h"
 #include "roo_windows/containers/aligned_layout.h"
 #include "roo_windows/containers/horizontal_layout.h"
 #include "roo_windows/containers/list_layout.h"
@@ -29,14 +47,36 @@ using namespace roo_windows;
 
 namespace tapuino {
 
+namespace {
+
+constexpr roo_windows::YDim RowHeight() {
+  return ROO_WINDOWS_ZOOM >= 200   ? 80
+         : ROO_WINDOWS_ZOOM >= 150 ? 53
+                                   : Scaled(40);
+}
+
+inline const roo_display::Font& base_font() {
+  return roo_display::font_NotoSans_Condensed_14();
+  //  return roo_display::font_NotoSans_Regular_15();
+  // return ROO_WINDOWS_ZOOM >= 200
+  //            ? roo_display::font_RobotoCondensed_Regular_28()
+  //        : ROO_WINDOWS_ZOOM >= 150
+  //            ? roo_display::font_RobotoCondensed_Regular_21()
+  //        : ROO_WINDOWS_ZOOM >= 100
+  //            ? roo_display::font_RobotoCondensed_Regular_14()
+  //            : roo_display::font_RobotoCondensed_Regular_11();
+}
+
+}  // namespace
+
 typedef std::function<void(int)> EntrySelectedFn;
 
 class ListEntry : public HorizontalLayout {
  public:
   ListEntry(const Environment& env, EntrySelectedFn select_fn)
       : HorizontalLayout(env),
-        icon_(env, ic_outlined_24_file_folder()),
-        title_(env, "Foo", roo_display::font_NotoSans_Condensed_15(),
+        icon_(env, SCALED_ROO_ICON(outlined, file_folder)),
+        title_(env, "Foo", base_font(),
                roo_display::kLeft | roo_display::kMiddle),
         select_fn_(select_fn) {
     icon_.setMargins(MARGIN_NONE);
@@ -58,22 +98,22 @@ class ListEntry : public HorizontalLayout {
 
   PreferredSize getPreferredSize() const override {
     return PreferredSize(PreferredSize::MatchParentWidth(),
-                         PreferredSize::ExactHeight(40));
+                         PreferredSize::ExactHeight(RowHeight()));
   }
 
   void setFolder(int16_t idx, roo_display::StringView name) {
     set(idx, name);
-    icon_.setIcon(ic_outlined_24_file_folder());
+    icon_.setIcon(SCALED_ROO_ICON(outlined, file_folder));
   }
 
   void setZip(int16_t idx, roo_display::StringView name) {
     set(idx, name);
-    icon_.setIcon(ic_outlined_24_file_folder_open());
+    icon_.setIcon(SCALED_ROO_ICON(outlined, file_folder_open));
   }
 
   void setFile(int16_t idx, roo_display::StringView name) {
     set(idx, name);
-    icon_.setIcon(ic_outlined_24_file_text_snippet());
+    icon_.setIcon(SCALED_ROO_ICON(outlined, file_text_snippet));
   }
 
   bool isClickable() const override { return true; }
@@ -127,8 +167,8 @@ class BrowserHeader : public HorizontalLayout {
  public:
   BrowserHeader(const Environment& env, std::function<void()> back_fn)
       : HorizontalLayout(env),
-        back_(env, ic_outlined_24_navigation_arrow_back()),
-        path_(env, "/", roo_display::font_NotoSans_Condensed_15(),
+        back_(env, SCALED_ROO_ICON(outlined, navigation_arrow_back)),
+        path_(env, "/", base_font(),
               roo_display::kLeft | roo_display::kMiddle) {
     back_.setMargins(MARGIN_NONE);
     path_.setMargins(MARGIN_NONE);
@@ -137,12 +177,12 @@ class BrowserHeader : public HorizontalLayout {
     add(back_, HorizontalLayout::Params().setGravity(kVerticalGravityMiddle));
     add(path_, HorizontalLayout::Params().setGravity(kVerticalGravityMiddle));
     setBackground(env.theme().color.secondary);
-    back_.setOnClicked(back_fn);
+    back_.setOnInteractiveChange(back_fn);
   }
 
   PreferredSize getPreferredSize() const override {
     return PreferredSize(PreferredSize::MatchParentWidth(),
-                         PreferredSize::ExactHeight(40));
+                         PreferredSize::ExactHeight(RowHeight()));
   }
 
   void setPath(std::string path) { path_.setText(std::move(path)); }
@@ -181,7 +221,9 @@ class BrowserContentPanel : public VerticalLayout {
     if (getMainWindow() != nullptr) {
       getMainWindow()->updateLayout();
     }
-    content_panel_.scrollTo(0, -40 * first_pos);
+    content_panel_.setVerticalScrollBarPresence(
+        VerticalScrollBar::SHOWN_WHEN_SCROLLING);
+    content_panel_.scrollTo(0, -RowHeight() * first_pos);
   }
 
  private:
@@ -195,16 +237,19 @@ class FloatingButtons : public VerticalLayout {
  public:
   FloatingButtons(const Environment& env)
       : VerticalLayout(env),
-        home_btn_(env, ic_outlined_24_action_home(), Button::TEXT),
-        add_btn_(env, ic_outlined_24_content_add(), Button::TEXT),
-        search_btn_(env, ic_outlined_24_action_search(), Button::TEXT) {
+        home_btn_(env, SCALED_ROO_ICON(outlined, action_home), Button::TEXT),
+        add_btn_(env, SCALED_ROO_ICON(outlined, content_add), Button::TEXT),
+        search_btn_(env, SCALED_ROO_ICON(outlined, action_search),
+                    Button::TEXT) {
     add(home_btn_);
     add(add_btn_);
     add(search_btn_);
   }
 
   uint8_t getElevation() const override { return 10; }
-  BorderStyle getBorderStyle() const override { return BorderStyle(10, 0); }
+  BorderStyle getBorderStyle() const override {
+    return BorderStyle(Scaled(10), 0);
+  }
 
  private:
   SimpleButton home_btn_;
@@ -230,8 +275,8 @@ class BrowserPanel : public AlignedLayout {
     // roo_display::kBottom.shiftBy(-24-h) | roo_display::kRight.shiftBy(-24));
     // add(search_btn_, roo_display::kBottom.shiftBy(-24) |
     // roo_display::kRight.shiftBy(-24));
-    add(floating_buttons_,
-        roo_display::kBottom.shiftBy(-24) | roo_display::kRight.shiftBy(-24));
+    add(floating_buttons_, roo_display::kBottom.shiftBy(Scaled(-30)) |
+                               roo_display::kRight.shiftBy(Scaled(-30)));
     // floating_buttons_.setElevation(5, 0);
   }
 
