@@ -95,8 +95,9 @@ class PlayButton : public BasePressableButton {
   }
 
   Dimensions getSuggestedMinimumDimensions() const override {
-    return Dimensions(4 + play_icon().extents().width(),
-                      4 + play_icon().extents().height());
+    return Dimensions(
+        roo_windows::Scaled(4) + play_icon().anchorExtents().width(),
+        roo_windows::Scaled(4) + play_icon().anchorExtents().height());
   }
 
   void setMotorOn(bool motor_on) {
@@ -139,8 +140,9 @@ class StopButton : public BasePressableButton {
   StopButton(const Environment& env) : BasePressableButton(env), mode_(STOP) {}
 
   Dimensions getSuggestedMinimumDimensions() const override {
-    return Dimensions(4 + stop_icon().extents().width(),
-                      4 + stop_icon().extents().height());
+    return Dimensions(
+        roo_windows::Scaled(4) + stop_icon().anchorExtents().width(),
+        roo_windows::Scaled(4) + stop_icon().anchorExtents().height());
   }
 
   void paint(const Canvas& canvas) const override {
