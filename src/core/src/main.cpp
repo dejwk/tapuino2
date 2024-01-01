@@ -80,6 +80,7 @@ bool initTapuino() {
   // // lcdUtils.Status(S_INIT_OK);
   // delay(1000);
   // return (true);
+  return true;
 }
 
 MenuEntry mainMenuEntries[] = {

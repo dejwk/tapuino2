@@ -4,10 +4,10 @@
 #include "memory/mem_buffer.h"
 #include "roo_display/core/utf8.h"
 #include "roo_display/ui/string_printer.h"
-// #include "roo_material_icons/outlined/18/av.h"
-// #include "roo_material_icons/outlined/24/action.h"
-// #include "roo_material_icons/outlined/24/content.h"
-// #include "roo_material_icons/outlined/24/file.h"
+// #include "roo_icons/outlined/18/av.h"
+// #include "roo_icons/outlined/24/action.h"
+// #include "roo_icons/outlined/24/content.h"
+// #include "roo_icons/outlined/24/file.h"
 
 #include "core/include/Lang.h"
 #include "core/include/TapLoader.h"
@@ -15,11 +15,11 @@
 #include "resources/gear_24_20.h"
 #include "resources/gear_24_40.h"
 #include "roo_dashboard/meters/percent_progress_bar.h"
-#include "roo_material_icons/outlined/18/navigation.h"
-#include "roo_material_icons/outlined/24/navigation.h"
-#include "roo_material_icons/outlined/36/navigation.h"
-#include "roo_material_icons/outlined/48/av.h"
-#include "roo_material_icons/outlined/48/navigation.h"
+#include "roo_icons/outlined/18/navigation.h"
+#include "roo_icons/outlined/24/navigation.h"
+#include "roo_icons/outlined/36/navigation.h"
+#include "roo_icons/outlined/48/av.h"
+#include "roo_icons/outlined/48/navigation.h"
 #include "roo_windows/fonts/NotoSans_Condensed/11.h"
 #include "roo_windows/fonts/NotoSans_Condensed/14.h"
 #include "roo_windows/fonts/NotoSans_Condensed/21.h"
@@ -334,7 +334,7 @@ class PlayerContentPanel : public VerticalLayout {
     }
     stop_.setMode(is_playing || read == 0 ? StopButton::STOP
                                           : StopButton::REWIND);
-    bool stop_enabled = is_playing || read > 0;
+    // bool stop_enabled = is_playing || read > 0;
     // stop_.setPushedDown(!stop_enabled);
     // stop_.setEnabled(stop_enabled);
     play_.setPushedDown(is_playing);

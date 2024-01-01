@@ -8,7 +8,7 @@
 #include "index/mem_index.h"
 #include "index/mem_index_builder.h"
 #include "io/sd.h"
-#include "roo_glog/logging.h"
+#include "roo_logging.h"
 #include "roo_scheduler.h"
 #include "roo_windows/core/activity.h"
 #include "roo_windows/core/environment.h"

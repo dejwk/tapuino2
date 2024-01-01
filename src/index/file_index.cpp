@@ -1,7 +1,7 @@
 #include "file_index.h"
 
 #include "io/simple_io.h"
-#include "roo_glog/logging.h"
+#include "roo_logging.h"
 
 namespace tapuino {
 

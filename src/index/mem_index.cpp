@@ -7,10 +7,12 @@
 #include "io/file_io.h"
 #include "io/simple_io.h"
 #include "memory/mem_buffer.h"
-#include "roo_glog/logging.h"
+#include "roo_logging.h"
 #include "strcmp.h"
 
 namespace tapuino {
+
+const char *kIndexFilePath = "/__tapuino/mem.idx";
 
 namespace {
 
@@ -84,17 +86,17 @@ void printEntrySize(uint32_t entry, char *out) {
   }
 }
 
-bool isEntryContainer(uint32_t entry) { return (entry & 0x80000000) == 0; }
+// bool isEntryContainer(uint32_t entry) { return (entry & 0x80000000) == 0; }
 
-bool isEntryFile(uint32_t entry) { return !isEntryContainer(entry); }
+// bool isEntryFile(uint32_t entry) { return !isEntryContainer(entry); }
 
-bool isEntryDir(uint32_t entry) { return (entry & 0xC0000000) == 0; }
+// bool isEntryDir(uint32_t entry) { return (entry & 0xC0000000) == 0; }
 
-bool isEntryZip(uint32_t entry) {
-  return isEntryContainer(entry) && !isEntryDir(entry);
-}
+// bool isEntryZip(uint32_t entry) {
+//   return isEntryContainer(entry) && !isEntryDir(entry);
+// }
 
-uint32_t getEntryDataOffset(uint32_t entry) { return entry & 0x0001FFFF; }
+// uint32_t getEntryDataOffset(uint32_t entry) { return entry & 0x0001FFFF; }
 
 }  // namespace
 

@@ -7,7 +7,7 @@
 
 namespace tapuino {
 
-static const char *kIndexFilePath = "/__tapuino/mem.idx";
+extern const char *kIndexFilePath;
 
 using roo_display::StringView;
 

@@ -115,14 +115,14 @@ ErrorCodes TapRecorder::CreateTap(File tapFile)
     size_t written = tapFile.write((uint8_t*) &tap_magic, TAP_HEADER_MAGIC_LENGTH);
     if (written != TAP_HEADER_MAGIC_LENGTH)
     {
-        Serial.printf("unable to write TAP magic! Length: %d\n", written);
+        Serial.printf("unable to write TAP magic! Length: %d\n", (int)written);
         return ErrorCodes::FILE_WRITE_ERROR;
     }
 
     written = tapFile.write((uint8_t*) &tapInfo, TAP_HEADER_DATA_LENGTH);
     if (written != TAP_HEADER_DATA_LENGTH)
     {
-        Serial.printf("unable to write TAP header! Length: %d\n", written);
+        Serial.printf("unable to write TAP header! Length: %d\n", (int)written);
         return ErrorCodes::FILE_WRITE_ERROR;
     }
 

@@ -9,7 +9,7 @@
 #include "core/include/ESP32TapLoader.h"
 #include "index/mem_index.h"
 #include "io/tap_file.h"
-#include "roo_glog/logging.h"
+#include "roo_logging.h"
 #include "roo_scheduler.h"
 #include "roo_windows/core/activity.h"
 #include "roo_windows/core/environment.h"

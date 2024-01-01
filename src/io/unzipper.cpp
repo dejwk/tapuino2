@@ -1,7 +1,7 @@
 #include "unzipper.h"
 
 #include "memory/mem_buffer.h"
-#include "roo_glog/logging.h"
+#include "roo_logging.h"
 
 namespace tapuino {
 

@@ -68,6 +68,9 @@ struct Emulator {
 
 #endif
 
+#include "roo_collections/flat_small_hash_set.h"
+
+
 #include <Arduino.h>
 #include <Preferences.h>
 #include <SD.h>
@@ -161,7 +164,7 @@ void setup() {
 //   mem_index.init();
   //heap_caps_print_heap_info(0);
   Serial.begin(115200);
-  roo_glog::SetVLOGLevel("*", 1);
+  // roo_logging::SetVLOGLevel("*", 1);
 
   // Serial.printf("free heap: %d", ESP.getFreeHeap());
   // heap_caps_print_heap_info(0);
