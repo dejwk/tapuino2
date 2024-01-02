@@ -12,7 +12,7 @@ http_archive(
 new_local_repository(
    name = "fltk",
    path = "roo_testing/fltk-1.3.5",
-   build_file = "roo_testing/fltk.BUILD",
+   build_file = "//roo_testing:fltk.BUILD",
 )
 
 new_local_repository(
