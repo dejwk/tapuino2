@@ -17,6 +17,12 @@ namespace tapuino {
 
 class IndexingActivity;
 
+extern const char *kIndexDir;
+extern const char *kMasterIndex;
+extern const char *kMemIndex;
+extern const char *kMasterIndexTmp;
+extern const char *kMemIndexTmp;
+
 class IndexBuilder : public roo_scheduler::IteratingTask::Iterator {
  public:
   enum Status {

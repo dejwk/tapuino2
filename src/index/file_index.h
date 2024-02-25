@@ -5,9 +5,8 @@
 
 #include <vector>
 
+#include "io/buffered_reader.h"
 #include "roo_display/core/utf8.h"
-
-#include "io/file_io.h"
 
 namespace tapuino {
 
@@ -91,6 +90,10 @@ class FileIndexReader {
     uint32_t file_size() const;
 
     ContainerType container_type() const;
+
+    std::string getPath() const;
+
+    void appendPath(std::string& path) const;
 
    private:
     bool is_container_;

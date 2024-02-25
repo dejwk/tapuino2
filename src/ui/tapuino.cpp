@@ -12,10 +12,11 @@ Tapuino::Tapuino(const Environment& env, roo_scheduler::Scheduler& scheduler,
     : options_(nullptr, nullptr),
       flip_buffer_(4096),
       utility_(nullptr, &options_, &flip_buffer_),
+      catalog_(sd, mem_index),
       start_(env, scheduler, sd, mem_index, indexer_, browser_),
       indexer_(env, scheduler, sd, mem_index),
       browser_(
-          env, scheduler, sd, mem_index,
+          env, scheduler, sd, catalog_,
           [this](const tapuino::MemIndexEntry& e) { enterPlayer(e); }),
       player_(env, scheduler, sd, mem_index, &utility_) {
   flip_buffer_.Init();

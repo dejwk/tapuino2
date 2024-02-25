@@ -222,7 +222,7 @@ class MemIndexEntry {
   MemIndexEntry(const MemIndex *fs, MemIndex::Handle h);
 
   // uint16_t record_size() const;
-
+  MemIndex::Handle handle() const { return h_; }
   MemIndex::Handle parent_handle() const;
 
   MemIndexEntry parent() const;
@@ -258,6 +258,14 @@ class MemIndexEntry {
   // Returns a simple name for this entry.
   std::string getName() const;
 
+  const MemIndex* fs() const { return fs_; };
+
+  size_t appendName(char* result, size_t max_len) const;
+
+  // Determines if the contents of the specified (assumed) container is
+  // read-only, which is because it is a ZIP file or within a ZIP file.
+  bool isContainerReadOnly() const;
+
  protected:
   friend class MemIndex;
 
@@ -271,7 +279,11 @@ class MemIndexEntry {
 
   void appendNamePrefix(uint8_t len, std::string &result) const;
 
+  void appendNamePrefix(uint8_t len, char* result) const;
+
   void appendPath(std::string &result) const;
+
+  size_t appendPath(char* result, size_t max_len) const;
 
   const MemIndex *fs_;
   MemIndex::Handle h_;

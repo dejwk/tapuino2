@@ -679,7 +679,6 @@ int StrnCiCmp(const char* s1, const char* s2, size_t ztCount) {
   unsigned char* p2 = 0;
 
   if (s1 && *s1 && s2 && *s2) {
-    char cExtChar = 0;
     pStr1Low = (unsigned char*)calloc(strlen(s1) + 1, sizeof(unsigned char));
     if (pStr1Low) {
       pStr2Low = (unsigned char*)calloc(strlen(s2) + 1, sizeof(unsigned char));
@@ -711,6 +710,7 @@ int StrnCiCmp(const char* s1, const char* s2, size_t ztCount) {
 }
 int StrCiCmp(const char* s1, const char* s2) {
   return StrnCiCmp(s1, s2, (size_t)(-1));
+  // return strcasecmp(s1, s2);
 }
 char* StrCiStr(const char* s1, const char* s2) {
   char* p = (char*)s1;

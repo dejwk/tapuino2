@@ -5,7 +5,7 @@
 #include <stack>
 #include <vector>
 
-#include "index/mem_index.h"
+#include "catalog/catalog.h"
 #include "io/sd.h"
 #include "roo_logging.h"
 #include "roo_scheduler.h"
@@ -22,7 +22,7 @@ class BrowsingActivity : public roo_windows::Activity {
  public:
   BrowsingActivity(const roo_windows::Environment& env,
                    roo_scheduler::Scheduler& scheduler, Sd& sd,
-                   MemIndex& mem_index, TapFileSelectFn select_fn);
+                   Catalog& catalog, TapFileSelectFn select_fn);
 
   void onStart() override;
   void onResume() override;
@@ -33,9 +33,18 @@ class BrowsingActivity : public roo_windows::Activity {
     return *CHECK_NOTNULL(contents_);
   }
 
-  void setCwd(MemIndex::PathEntryId cd, uint16_t first_pos);
+  std::string currentPath() const;
+
+  void setCwd(MemIndex::PathEntryId cd);
+  void scrollToPos(uint16_t pos);
+  void scrollToDim(roo_windows::YDim y);
+
   void onEntryClicked(int idx);
   void onParentDir();
+  void onHomeClicked();
+
+  void onFileDeleted(int idx);
+  void onFileDeletedConfirmed(int idx);
 
  private:
   void checkCardPresent();
@@ -44,7 +53,7 @@ class BrowsingActivity : public roo_windows::Activity {
   roo_scheduler::RepetitiveTask card_checker_;
   std::unique_ptr<roo_windows::Widget> contents_;
   Sd& sd_;
-  MemIndex& mem_index_;
+  Catalog& catalog_;
   MemIndex::PathEntryId cd_;
   MemIndex::PathEntryId* cd_list_;
   int element_count_;  // Not including '..'

@@ -24,7 +24,7 @@ struct Emulator {
 
   Emulator()
       : viewport(),
-        flexViewport(viewport, 2,
+        flexViewport(viewport, 1,
                      roo_testing_transducers::FlexViewport::kRotationRight),
         display(flexViewport),
         touch(flexViewport,
@@ -85,7 +85,7 @@ struct Emulator {
 using std::max;
 using std::min;
 
-#include "config.h"
+#include "core/include/config.h"
 #include "index/mem_index.h"
 #include "io/sd.h"
 #include "memory/mem_buffer.h"
@@ -145,8 +145,8 @@ roo_display::Orientation::LeftDown()));
 
 // roo_display::Display display(tft);
 
-Environment env;
-roo_windows::Application app(&env, display, scheduler);
+Environment env(scheduler);
+roo_windows::Application app(&env, display);
 
 Keyboard kb(env, kbEngUS());
 TextFieldEditor editor(scheduler, kb);

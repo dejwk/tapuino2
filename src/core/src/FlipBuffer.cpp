@@ -1,6 +1,6 @@
 #include "core/include/FlipBuffer.h"
 
-#include "io/file_io.h"
+#include "io/buffered_reader.h"
 #include "io/input_stream.h"
 
 using namespace TapuinoNext;

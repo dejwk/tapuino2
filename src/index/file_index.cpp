@@ -1,6 +1,6 @@
 #include "file_index.h"
 
-#include "io/simple_io.h"
+#include "io/data_io.h"
 #include "roo_logging.h"
 
 namespace tapuino {
@@ -11,6 +11,7 @@ void FileIndexWriter::open(StringView path) {
   if (!target_) {
     status_ = BAD_FILE;
   }
+  fpos_ = 0;
 }
 
 void FileIndexWriter::close() {
@@ -23,7 +24,6 @@ void FileIndexWriter::close() {
 
 void FileIndexWriter::containerBegin(ContainerType type, StringView name,
                                      uint32_t size) {
-  LOG(INFO) << "Container begin for " << name << ", " << size;
   if (status_ != OK) return;
   write_path_.push_back(fpos_);
   addEntry(true, type, name, size);
@@ -52,7 +52,6 @@ void FileIndexWriter::addEntry(bool container, uint8_t type, StringView name,
 }
 
 void FileIndexWriter::containerEnd() {
-  LOG(INFO) << "Container end " << write_path_.size();
   if (status_ != OK) return;
   CHECK(!write_path_.empty());
   uint8_t container_end_marker = 0xFF;
@@ -82,12 +81,27 @@ ContainerType FileIndexReader::Entry::container_type() const {
   return (ContainerType)(type_ & 7);
 };
 
+std::string FileIndexReader::Entry::getPath() const {
+  std::string result;
+  appendPath(result);
+  return result;
+}
+
+void FileIndexReader::Entry::appendPath(std::string& path) const {
+  if (!isRoot()) {
+    parent()->appendPath(path);
+    path += "/";
+  }
+  path += name();
+}
+
 uint32_t FileIndexReader::Entry::file_size() const {
-  CHECK(isFile());
+  CHECK(isFile() || container_type() == ZIP);
   return size_;
 }
 
 void FileIndexReader::open(StringView path) {
+  status_ = OK;
   CHECK(!input_);
   input_.set(fs_.open(String((const char *)path.data(), path.size()), "r"));
   if (!input_) {

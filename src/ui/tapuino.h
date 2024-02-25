@@ -1,5 +1,6 @@
 #pragma once
 
+#include "catalog/catalog.h"
 #include "index/mem_index.h"
 #include "io/sd.h"
 #include "roo_logging.h"
@@ -31,6 +32,8 @@ class Tapuino {
 
   TapuinoNext::FlipBuffer flip_buffer_;
   TapuinoNext::UtilityCollection utility_;
+
+  Catalog catalog_;
 
   StartActivity start_;
   IndexingActivity indexer_;

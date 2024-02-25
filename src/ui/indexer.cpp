@@ -19,10 +19,6 @@ using namespace roo_windows;
 
 namespace tapuino {
 
-static const char *kIndexDir = "/__tapuino";
-static const char *kMasterIndex = "/__tapuino/master.idx";
-static const char *kMemIndex = "/__tapuino/mem.idx";
-
 IndexingActivity::IndexingActivity(const Environment &env,
                                    roo_scheduler::Scheduler &scheduler, Sd &sd,
                                    MemIndex &mem_index)

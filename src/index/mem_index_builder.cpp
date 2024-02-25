@@ -1,6 +1,6 @@
 #include "mem_index_builder.h"
 
-#include "io/simple_io.h"
+#include "io/data_io.h"
 #include "memory/mem_buffer.h"
 #include "roo_logging.h"
 

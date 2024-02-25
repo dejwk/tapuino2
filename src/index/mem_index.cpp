@@ -4,8 +4,9 @@
 
 #include <cstring>
 
-#include "io/file_io.h"
-#include "io/simple_io.h"
+#include "io/buffered_reader.h"
+#include "io/buffered_writer.h"
+#include "io/data_io.h"
 #include "memory/mem_buffer.h"
 #include "roo_logging.h"
 #include "strcmp.h"
@@ -201,6 +202,20 @@ bool MemIndexEntry::isContainer() const {
   return (getEntry() & 0x80000000) == 0;
 }
 
+bool MemIndexEntry::isContainerReadOnly() const {
+  MemIndexEntry tmp = *this;
+  while (true) {
+    if (tmp.isZip()) {
+      return true;
+    }
+    if (tmp.isRoot()) {
+      return false;
+    }
+    tmp = tmp.parent();
+  }
+}
+
+
 bool MemIndexEntry::isDir() const { return (getEntry() & 0xC0000000) == 0; }
 
 bool MemIndexEntry::isZip() const {
@@ -250,14 +265,39 @@ std::string MemIndexEntry::getPath() const {
 void MemIndexEntry::appendPath(std::string &path) const {
   if (!isRoot()) {
     parent().appendPath(path);
+    path += "/";
   }
   roo_display::StringView p = prefix();
   if (!p.empty()) {
     path.append((const char *)p.data(), p.size());
-    path += "/";
   }
   appendName(path);
-  if (isContainer()) path += "/";
+}
+
+size_t MemIndexEntry::appendPath(char *result, size_t max_len) const {
+  size_t len = 0;
+  if (!isRoot()) {
+    len += parent().appendPath(result, max_len);
+    if (len >= max_len) return len;
+  }
+  roo_display::StringView p = prefix();
+  if (!p.empty()) {
+    size_t plen = max_len - len;
+    if (plen > p.size()) plen = p.size();
+    memcpy(&result[len], (const char *)p.data(), plen);
+    len += plen;
+    if (len >= max_len) return len;
+    result[len] = '/';
+    ++len;
+    if (len >= max_len) return len;
+  }
+  len += appendName(&result[len], max_len - len);
+  if (len >= max_len) return len;
+  if (isContainer()) {
+    result[len] = '/';
+    ++len;
+  }
+  return len;
 }
 
 std::string MemIndexEntry::getName() const {
@@ -275,6 +315,26 @@ void MemIndexEntry::appendName(std::string &path) const {
   path.append((const char *)suffix.data(), suffix.size());
 }
 
+size_t MemIndexEntry::appendName(char *result, size_t max_len) const {
+  size_t len = 0;
+  if (max_len == 0) return 0;
+  uint8_t shared_prefix = shared_name_prefix_len();
+  if (shared_prefix > 0) {
+    if (shared_prefix > max_len) {
+      shared_prefix = max_len;
+    }
+    parent().appendNamePrefix(shared_prefix, result);
+    if (shared_prefix == max_len) return max_len;
+    len = shared_prefix;
+  }
+  roo_display::StringView suffix = unique_name_suffix();
+  size_t slen = max_len - len;
+  if (slen > suffix.size()) slen = suffix.size();
+  memcpy(&result[len], (const char *)suffix.data(), slen);
+  len += slen;
+  return len;
+}
+
 void MemIndexEntry::appendNamePrefix(uint8_t len, std::string &path) const {
   uint8_t shared_prefix = shared_name_prefix_len();
   if (shared_prefix > 0) {
@@ -286,6 +346,74 @@ void MemIndexEntry::appendNamePrefix(uint8_t len, std::string &path) const {
   path.append((const char *)suffix.data(), len);
 }
 
+void MemIndexEntry::appendNamePrefix(uint8_t len, char *result) const {
+  uint8_t shared_prefix = shared_name_prefix_len();
+  if (shared_prefix > 0) {
+    if (shared_prefix > len) shared_prefix = len;
+    parent().appendNamePrefix(shared_prefix, result);
+    len -= shared_prefix;
+    result += shared_prefix;
+  }
+  roo_display::StringView suffix = unique_name_suffix();
+  memcpy(result, (const char *)suffix.data(), len);
+}
+
+namespace {
+
+void RecursivelyExpandHandlePath(const MemIndexEntry &e, MemIndex::Handle **h) {
+  if (e.isRoot()) {
+    // Don't append; roots are always equal.
+    return;
+  }
+  RecursivelyExpandHandlePath(e.parent(), h);
+  *(*h)++ = e.handle();
+}
+
+// Writes out the path of file handles for the entry e, into the array pointed
+// by `path`. Omits the root. Returns the length of the path, less one. That is,
+// returns the number of elements set in the `path` array.
+size_t ExpandHandlePath(const MemIndexEntry &e, MemIndex::Handle *path) {
+  MemIndex::Handle *start = path;
+  RecursivelyExpandHandlePath(e, &path);
+  return path - start;
+}
+
+// Compares two paths lexicographically, ignoring case.
+//
+// First, determines and rejects the common prefix, using file handles (which
+// are much faster to compare than names, since they are just integers). Then,
+// compares the names of the first path elements that are actually different.
+// (Note that when handles differ (after rejecting the common prefix), the names
+// must differ, too, since names are unique per directory).
+int MemIndexEntryCmp(const MemIndexEntry &a, const MemIndexEntry &b) {
+  MemIndex::Handle ah[10];
+  MemIndex::Handle bh[10];
+  size_t ahl = ExpandHandlePath(a, ah);
+  size_t bhl = ExpandHandlePath(b, bh);
+  size_t common = ahl < bhl ? ahl : bhl;
+  for (int i = 0; i < common; ++i) {
+    const MemIndex::Handle &ahi = ah[i];
+    const MemIndex::Handle &bhi = bh[i];
+    if (ahi != bhi) {
+      // Found different dir; must be different name.
+      char an[64];
+      char bn[64];
+      MemIndexEntry ad(a.fs(), ahi);
+      MemIndexEntry bd(b.fs(), bhi);
+      an[ad.appendName(an, 63)] = 0;
+      bn[bd.appendName(bn, 63)] = 0;
+      StrToLwrExt((unsigned char*)an);
+      StrToLwrExt((unsigned char*)bn);
+      return strcmp(an, bn) < 0;
+      // return StrCiCmp(an, bn) < 0;
+    }
+  }
+  // Common prefix; the shorter dir is less-than.
+  return ahl < bhl;
+}
+
+}  // namespace
+
 void MemIndex::buildSortIndexes() {
   LOG(INFO) << "Building sort index by path...";
   for (uint16_t i = 0; i < count_; ++i) {
@@ -295,7 +423,32 @@ void MemIndex::buildSortIndexes() {
             [&](Handle &i, Handle &j) {
               MemIndexEntry a(this, i);
               MemIndexEntry b(this, j);
-              return StrCiCmp(a.getPath().c_str(), b.getPath().c_str()) < 0;
+              return MemIndexEntryCmp(a, b);
+              // char ap[256];
+              // char bp[256];
+              // ap[a.appendPath(ap, 255)] = 0;
+              // bp[b.appendPath(bp, 255)] = 0;
+              // // StrToLwrExt((unsigned char*)ap);
+              // // StrToLwrExt((unsigned char*)bp);
+              // // char* p1 = ap;
+              // // char* p2 = bp;
+              // // for (; ; p1++, p2++) {
+              // //   int iDiff = *p1 - *p2;
+              // //   if (iDiff != 0 || !*p1 || !*p2) {
+              // //     return iDiff < 0;
+              // //   }
+              // // }
+              // // return false;
+
+              // // return strcmp(ap, bp) < 0;
+
+              // // return false;
+              // // printf("%s %s\n", ap, bp);
+              // return strcasecmp(ap, bp) < 0;
+              // // return MemIndexEntryCmp(a, b) < 0;
+              // // return StrCiCmp(a.getPath().c_str(), b.getPath().c_str()) <
+              // 0;
+              // // return StrCiCmp(ap, bp) < 0;
             });
   LOG(INFO) << "Building sort index by path done.";
   LOG(INFO) << "Building sort index for files by name...";
